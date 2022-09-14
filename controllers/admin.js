@@ -2,6 +2,7 @@ var express = require('express');
 var Tool = require("../TOOL");
 
 const User = require("../mongoDB/models/users");
+const Location = require("../mongoDB/models/locations");
 
 const app = express();
 app.use(express.json());
@@ -64,5 +65,27 @@ app.post('/login', async(req,res)=>{
     res.status(500).send(err);
   }
 })
+
+app.post('/add-location',async (req,res)=>{
+  try{
+    const {name,about,city,state,category,timing} = req.body;
+    if(!(name,city,state)){
+      res.status(400).send("Insufficient data");
+    }else{
+      const loc = await Location.findOne({name,city,state});
+      if(loc){
+        res.status(409).send("Location already added");
+      }else{
+        const data = await Location.create({
+          name, about, city, state, category, timing
+        })
+        res.status(201).send(data);
+      }
+    }
+  }catch(err){
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
 
 module.exports = app;
