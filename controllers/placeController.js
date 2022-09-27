@@ -66,40 +66,6 @@ export const getPlaces = async(req,res)=>{
   }
 }
 
-export const editPlace = async(req,res)=>{
-  try{
-    const {name} = req.body;
-    const{about,city,state,geo_locations,category,timing} = req.body;
-    let place = await Place.findOne({name});
-    if(!place){
-      res.status(404).send("Place doesn't exists.");
-    }else{
-      await Place.updateOne({name},{$set:{about:about,city:city,state:state,geo_locations:geo_locations,category:category,timing:timing}});
-      place = await Place.findOne({name});
-      res.status(201).send(place);
-    }
-  }catch(err){
-    console.log(err);
-    res.status(500).send("Internal server error!");
-  }
-}
-
-export const deletePlace= async (req,res)=>{
-  try{
-    const {name} = req.body;
-    let place = await Place.findOne({name});
-    if(!place){
-      res.status(404).send("Place doesn't exists.");
-    }else{
-      await Place.deleteOne({name});
-      res.status(202).send("Place deleted!");
-    }
-  }catch(err){
-    console.log(err);
-    res.status(500).send("Internal server error!");
-  }
-}
-
 export const getFilteredPlaces = async (req,res)=>{
   let {city,state} = req.body;
   // console.log( typeof city,state)
@@ -123,5 +89,23 @@ export const getFilteredPlaces = async (req,res)=>{
   }catch(err){
     console.log(err);
     res.status(500).send(err);
+  }
+}
+
+export const uploadZip = async (req,res)=>{
+  try{
+    if(req.file){
+      console.log(req.file);
+      const target = path.join(__dirname,'../unzip_here');
+      console.log(target, typeof target)
+      await extract(path.join(req.file.path),{dir:target});
+      console.log("Extraction complete");
+      res.send("sucessfull")
+    }else{
+      console.log("file not found");
+    }
+  }catch(err){
+    console.log(err.message);
+    res.status(500).send("Internal server error!");
   }
 }
