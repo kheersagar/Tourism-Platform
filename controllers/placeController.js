@@ -125,3 +125,21 @@ export const getFilteredPlaces = async (req,res)=>{
     res.status(500).send(err);
   }
 }
+
+export const uploadZip = async (req,res)=>{
+  try{
+    if(req.file){
+      console.log(req.file);
+      const target = path.join(__dirname,'../unzip_here');
+      console.log(target, typeof target)
+      await extract(path.join(req.file.path),{dir:target});
+      console.log("Extraction complete");
+      res.send("sucessfull")
+    }else{
+      console.log("file not found");
+    }
+  }catch(err){
+    console.log(err.message);
+    res.status(500).send("Internal server error!");
+  }
+}
