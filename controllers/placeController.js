@@ -1,7 +1,7 @@
 import Place from "../mongoDB/models/places.js";
 import Csv from "jquery-csv";
-import paginatedResult from "../utilities/paginate.js";
 import extract from "extract-zip";
+import uploadFile from "../utilities/firebase.js"
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -51,14 +51,12 @@ export const addCSV = async(req,res)=>{
 
 export const getPlaces = async(req,res)=>{
   try{
-
-    const places = await Place.find();
-    // const places = await Place.find();
+    const {page,limit} = req.query;
+    const places = await Place.find().skip((page-1)*limit).limit(limit);
     if(places.length<1){
       res.status(400).send("No places data found");
     }else{
-      const pagedata = paginatedResult(places,req.query.page,req.query.limit);
-      res.status(200).json({data:pagedata});
+      res.status(200).json({data:places});
     }
   }catch(err){
     console.log(err);
@@ -102,6 +100,7 @@ export const deletePlace= async (req,res)=>{
 
 export const getFilteredPlaces = async (req,res)=>{
   let {city,state} = req.body;
+  let {page,limit} = req.query;
   // console.log( typeof city,state)
   let query = {};
   try{
@@ -113,8 +112,7 @@ export const getFilteredPlaces = async (req,res)=>{
     state = JSON.parse(state)
     query.state = {$in :state}
   }
-    const places = await Place.find(query)
-      .skip(1).limit(5);
+    const places = await Place.find(query).skip((page-1)*limit).limit(limit);
     if(places.length<1){
       res.status(400).send("No places data found");
     }else{
@@ -130,14 +128,26 @@ export const uploadZip = async (req,res)=>{
   try{
     if(req.file){
       console.log(req.file);
-      const target = path.join(__dirname,'../unzip_here');
+      const target = path.join(__dirname,'../unzip_here/images');
       console.log(target, typeof target)
       await extract(path.join(req.file.path),{dir:target});
-      console.log("Extraction complete");
-      res.send("sucessfull")
+      console.log("Extraction complete!");
+      res.send("Upload Sucess!")
     }else{
       console.log("file not found");
     }
+    let address = path.join(__dirname,'../unzip_here/images');
+    Fs.readdir(address,(err,files)=>{
+      if(err){
+        console.log(err);
+      }else{
+        files.forEach(async function(file){
+          console.log(file);
+          await uploadFile(address+"/"+file,file);
+        })
+      }
+    })
+
   }catch(err){
     console.log(err.message);
     res.status(500).send("Internal server error!");
