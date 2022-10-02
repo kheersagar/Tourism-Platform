@@ -14,10 +14,12 @@
 // const storage = getStorage(app, process.env.BUCKET_URL);
 //
 // export default storage;
+import { createRequire } from "module"; // Bring in the ability to create the 'require' method
+const require = createRequire(import.meta.url); // construct the require method
 
 import firebaseAdmin from 'firebase-admin';
 import {v4 as uuidv4} from 'uuid';
-import serviceAccount from '../cg-tourism-86003-firebase-adminsdk-k21ht-53dbe74ddf.json'assert { type: "json" };
+const serviceAccount =  require ('../cg-tourism-86003-firebase-adminsdk-k21ht-53dbe74ddf.json');
 
 var admin = firebaseAdmin.initializeApp({
   credential : firebaseAdmin.credential.cert(serviceAccount),
