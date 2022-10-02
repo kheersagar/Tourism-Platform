@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser';
 import express from 'express'
 import dbconnect from './mongoDB/connection.js';
 import userRouter from './routes/usersRouter.js'
@@ -6,7 +5,6 @@ import superadminRouter from './routes/superadminRouter.js'
 dbconnect();
 const app = express();
 
-app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.json());
 app.use(express.static("public"));
 
