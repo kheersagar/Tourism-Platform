@@ -6,7 +6,7 @@ import generateToken from "../utilities/generateToken.js";
 export const registerUser = async (req,res)=>{
   try{
     const {email,password,mobile,role} = req.body;
-    if(!(email||password)){
+    if(!(email)||!(password)){
       res.status(400).send("Insufficent input");
     }
     const old = await User.findOne({email});
@@ -25,8 +25,8 @@ export const registerUser = async (req,res)=>{
     }
   }catch(err){
     console.log(err);
+    res.status(500).send("Internal server error");
   }
-  res.status(500).send("Internal server error");
 }
 
 export const createAdmin = async (req,res)=>{
@@ -56,9 +56,10 @@ export const createAdmin = async (req,res)=>{
 export const loginUser = async (req,res)=>{
   try{
     const {email,password} = req.body;
+    console.log(email,password);
     if(!(email||password)){
       res.status(400).send("Invalid credentials");
-    }
+    }else{
       const user = await User.findOne({email});
       if(!user){
         res.status(400).send("No user found!")
@@ -68,6 +69,7 @@ export const loginUser = async (req,res)=>{
         user.token = token;
         res.status(200).send(user);
       }
+    }
   }
   }catch(err){
     console.log(err);
@@ -92,15 +94,15 @@ export const userProfile = async (req,res)=>{
 
 export const userUpdate = async (req,res)=>{
   try{
-    const {email} = req.body;
-    const {password,mobile,role} = req.body;
-    let user = await User.findOne({email});
+    const {id} = req.body;
+    const {email,password,mobile,role} = req.body;
+    let user = await User.findOne({_id:id});
     if(!user){
       res.status(400).send("Invalid email");
     }else{
       let encryptedPassword = await bcrypt.hash(password, 10);
-      const data = await User.updateOne({email},{$set:{password:encryptedPassword,mobile:mobile,role:role}});
-      user = await User.findOne({email});
+      const data = await User.updateOne({_id:id},{$set:{email:email,password:encryptedPassword,mobile:mobile,role:role}});
+      user = await User.findOne({_id:id});
       res.status(201).send(user);
     }
   }catch(err){
@@ -111,12 +113,12 @@ export const userUpdate = async (req,res)=>{
 
 export const userDelete = async (req,res)=>{
   try{
-    const {email} = req.body;
-    const user = await User.findOne({email});
+    const {id} = req.body;
+    const user = await User.findOne({_id:id});
     if(!user){
       res.status(400).send("Invalid email");
     }else{
-      await User.deleteOne({email});
+      await User.deleteOne({_id:id});
       res.status(202).send("User deleted!");
     }
   }catch(err){
