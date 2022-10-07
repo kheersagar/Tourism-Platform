@@ -66,14 +66,15 @@ export const getPlaces = async(req,res)=>{
 
 export const editPlace = async(req,res)=>{
   try{
-    const {name} = req.body;
-    const{about,city,state,geo_locations,category,timing} = req.body;
-    let place = await Place.findOne({name});
+    const {id} = req.body;
+    const{name,about,city,state,geo_locations,category,timing} = req.body;
+    let place = await Place.findOne({_id:id});
+    console.log(place);
     if(!place){
-      res.status(404).send("Place doesn't exists.");
+      res.status(404).send("Place doesn't exists for this ID...");
     }else{
-      await Place.updateOne({name},{$set:{about:about,city:city,state:state,geo_locations:geo_locations,category:category,timing:timing}});
-      place = await Place.findOne({name});
+      await Place.updateOne({_id:id},{$set:{name:name,about:about,city:city,state:state,geo_locations:geo_locations,category:category,timing:timing}});
+      place = await Place.findOne({_id:id});
       res.status(201).send(place);
     }
   }catch(err){
@@ -84,12 +85,12 @@ export const editPlace = async(req,res)=>{
 
 export const deletePlace= async (req,res)=>{
   try{
-    const {name} = req.body;
-    let place = await Place.findOne({name});
+    const {id} = req.body;
+    let place = await Place.findOne({_id:id});
     if(!place){
-      res.status(404).send("Place doesn't exists.");
+      res.status(404).send("Place doesn't exists for this ID...");
     }else{
-      await Place.deleteOne({name});
+      await Place.deleteOne({_id:id});
       res.status(202).send("Place deleted!");
     }
   }catch(err){
@@ -132,7 +133,6 @@ export const uploadZip = async (req,res)=>{
       console.log(target, typeof target)
       await extract(path.join(req.file.path),{dir:target});
       console.log("Extraction complete!");
-      res.send("Upload Sucess!")
     }else{
       console.log("file not found");
     }
@@ -144,10 +144,10 @@ export const uploadZip = async (req,res)=>{
         files.forEach(async function(file){
           console.log(file);
           await uploadFile(address+"/"+file,file);
-        })
+        });
       }
     })
-
+    res.send("Upload Success!");
   }catch(err){
     console.log(err.message);
     res.status(500).send("Internal server error!");
