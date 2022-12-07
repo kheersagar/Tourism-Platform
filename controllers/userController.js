@@ -67,7 +67,9 @@ export const loginUser = async (req,res)=>{
         if (user && (await bcrypt.compare(password, user.password))) {
         const token = generateToken(user,email,user.role);
         user.token = token;
-        res.status(200).send(user);
+        res.cookie('x-access-token',token, {expires: new Date(Date.now() + 960000),httpOnly:true,sameSite: 'none',secure:true})
+
+        res.cookie('refresh-token',token, {expires: new Date(Date.now() + 2*960000),httpOnly:true,sameSite: 'none',secure:true}).status(200).send(user);
       }
     }
   }

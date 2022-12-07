@@ -3,14 +3,19 @@ import dbconnect from './mongoDB/connection.js';
 import userRouter from './routes/usersRouter.js'
 import superadminRouter from './routes/superadminRouter.js'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 dbconnect();
 const app = express();
+
+app.use(cookieParser())
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 app.use(express.static("public"));
 app.use(cors({
-  origin:'*'
+  origin:'http://localhost:5173',
+  credentials:true,
+  exposedHeaders: ["set-cookie"],
 }))
 
 
