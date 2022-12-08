@@ -2,12 +2,18 @@ import express from 'express'
 const app = express();
 import jwt from 'jsonwebtoken'
 
-function generateToken(obj,email,role){
+export function generateToken(obj,email,role){
   return jwt.sign(
   {obj_id: obj._id, email,role },
   process.env.TOKEN_KEY,
-  {expiresIn:'2h'},
+  {expiresIn:'15s'},
 );
 }
 
-export default generateToken;
+export const generateRefreshToken = (obj,email,role) =>{
+  return jwt.sign(
+    {obj_id: obj._id, email,role },
+    process.env.TOKEN_KEY,
+    {expiresIn:'1d'},
+  );
+}

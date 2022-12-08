@@ -1,7 +1,7 @@
 import User from "../mongoDB/models/users.js";
 import Place from "../mongoDB/models/places.js";
 import bcrypt from "bcrypt";
-import generateToken from "../utilities/generateToken.js";
+import {generateToken, generateRefreshToken } from "../utilities/generateToken.js";
 
 export const registerUser = async (req,res)=>{
   try{
@@ -66,10 +66,11 @@ export const loginUser = async (req,res)=>{
       }else{
         if (user && (await bcrypt.compare(password, user.password))) {
         const token = generateToken(user,email,user.role);
+        const refreshToken = generateRefreshToken(user,email,user.role) 
         user.token = token;
-        res.cookie('x-access-token',token, {expires: new Date(Date.now() + 960000),httpOnly:true,sameSite: 'none',secure:true})
+        res.cookie('x-access-token',token, {expires: new Date(Date.now() + 360000),httpOnly:true,sameSite: 'none',secure:true})
 
-        res.cookie('refresh-token',token, {expires: new Date(Date.now() + 2*960000),httpOnly:true,sameSite: 'none',secure:true}).status(200).send(user);
+        res.cookie('refresh-token',refreshToken, {expires: new Date(Date.now() + 2*360000),httpOnly:true,sameSite: 'none',secure:true}).status(200).send(user);
       }
     }
   }
